@@ -31,8 +31,8 @@ public class ClientController {
     @GetMapping("/run")
     public String runTest(@RequestParam String mode, @RequestParam int count, @RequestParam int clients) {
         return switch (mode) {
-            case "ex1_part1" -> runEx1(count, clients, "inc_p1", "count_p1");
-            case "ex1_part2" -> runEx1(count, clients, "inc_p2", "count_p2");
+            case "ex1_part1" -> run(count, clients, "inc_p1", "count_p1", 1, 1);
+            case "ex1_part2" -> run(count, clients, "inc_p2", "count_p2", 1, 2);
             default -> """
                     Режим виконання заданий не правильно.
                     Має складатись з ex(номер завдання)_part(номер пункту завдання).
@@ -43,22 +43,23 @@ public class ClientController {
 
     @GetMapping("/run_ex1_part1")
     public String runTestEx1Part1Cli1(@RequestParam int clients) {
-        return runEx1(10000, clients, "inc_p1", "count_p1");
+        return run(10000, clients, "inc_p1", "count_p1", 1, 1);
     }
 
     @GetMapping("/run_ex1_part2")
     public String runTestEx1Part1Cli2(@RequestParam int clients) {
-        return runEx1(10000, clients, "inc_p2", "count_p2");
+        return run(10000, clients, "inc_p2", "count_p2", 1, 2);
     }
 
-    private String runEx1(int count, int clients, String incCommand, String countCommand) {
+    private String run(int count, int clients, String incCommand, String countCommand,
+                       int exerciseNumber, int partNumber) {
         StringBuilder result = new StringBuilder(String.format("""
-            Виконання тесту за логікою завдання 1, пункт 1 з параметрами:
+            Виконання тесту за логікою завдання %d, пункт %d з параметрами:
              - кількість викликів = %d
              - кількість клієнтів = %d
             
             Результати:
-            """, count, clients));
+            """, exerciseNumber, partNumber, count, clients));
         log.info(result.toString());
 
         CountDownLatch latch = new CountDownLatch(clients);
