@@ -31,8 +31,8 @@ public class ClientController {
     @GetMapping("/run")
     public String runTest(@RequestParam String mode, @RequestParam int count, @RequestParam int clients) {
         return switch (mode) {
-            case "ex1_part1" -> runEx1(count, clients, "inc_p1", "count_p1", 1);
-            case "ex1_part2" -> runEx1(count, clients, "inc_p2", "count_p2", 2);
+            case "ex1_part1" -> runEx1(count, clients, "inc_p1", "count_p1", 1, 1);
+            case "ex1_part2" -> runEx1(count, clients, "inc_p2", "count_p2", 1, 2);
             default -> """
                     Режим виконання заданий не правильно.
                     Має складатись з ex(номер завдання)_part(номер пункту завдання).
@@ -45,22 +45,22 @@ public class ClientController {
 
     @GetMapping("/run_ex1_part1")
     public String runTestEx1Part1Cli1(@RequestParam int clients) {
-        return runEx1(10000, clients, "inc_p1", "count_p1", 1);
+        return runEx1(10000, clients, "inc_p1", "count_p1", 1, 1);
     }
 
     @GetMapping("/run_ex1_part2")
     public String runTestEx1Part1Cli2(@RequestParam int clients) {
-        return runEx1(10000, clients, "inc_p2", "count_p2", 2);
+        return runEx1(10000, clients, "inc_p2", "count_p2", 1, 2);
     }
 
-    private String runEx1(int count, int clients, String incCommand, String countCommand, int partNumber) {
+    private String runEx1(int count, int clients, String incCommand, String countCommand, int exerciseNumber, int partNumber) {
         StringBuilder result = new StringBuilder(String.format("""
-            Виконання тесту за логікою завдання 1, пункт %d з параметрами:
+            Виконання тесту за логікою завдання %d, пункт %d з параметрами:
              - кількість викликів = %d
              - кількість клієнтів = %d
             
             Результати:
-            """, partNumber, count, clients));
+            """, exerciseNumber, partNumber, count, clients));
         log.info(result.toString());
 
         CountDownLatch latch = new CountDownLatch(clients);
@@ -136,15 +136,19 @@ public class ClientController {
     @GetMapping("/run_ex2_part6")
     public String runTestEx2Part6() {
         restTemplate.postForEntity(getServerUrl() + "/" + "reset", null, String.class);
-        return runEx1(10000, 10, "inc_p6", "count", 6);
+        return runEx1(10000, 10, "inc_p6", "count", 2, 6);
     }
 
     private String runEx2(String incCommand, int partNumber) {
+        return runEx2(incCommand, "count", 2, partNumber);
+    }
+
+    private String runEx2(String incCommand, String countCommand, int exerciseNumber, int partNumber) {
         StringBuilder result = new StringBuilder(String.format("""
-            Виконання тесту за логікою завдання 2, пункт %d.
+            Виконання тесту за логікою завдання %d, пункт %d.
             
             Результати:
-            """, partNumber));
+            """, exerciseNumber, partNumber));
         log.info(result.toString());
         restTemplate.postForEntity(getServerUrl() + "/" + "reset", null, String.class);
 
@@ -193,7 +197,7 @@ public class ClientController {
             return "Виконання було перервано";
         }
 
-        Integer finalCount = restTemplate.getForObject(getServerUrl() + "/" + "count", Integer.class);
+        Integer finalCount = restTemplate.getForObject(getServerUrl() + "/" + countCommand, Integer.class);
         String counterResult = String.format("Фінальне значення лічильника = %d", finalCount);
         result.append("\n").append(counterResult);
         log.info(counterResult);
@@ -207,6 +211,38 @@ public class ClientController {
         result.append("\n").append(timeResult);
         log.info(timeResult);
         return result.toString();
+    }
+
+// Для завдання 3 --------------------------------------------------------------------------------------------
+
+    @GetMapping("/run_ex3_part4")
+    public String runTestEx3Part4() {
+        return runEx3("inc_p4", "map_count", 4);
+    }
+
+    @GetMapping("/run_ex3_part5")
+    public String runTestEx3Part5() {
+        return runEx3("inc_p5", "map_count", 5);
+    }
+
+    @GetMapping("/run_ex3_part6")
+    public String runTestEx3Part6() {
+        return runEx3("inc_p6", "map_count", 6);
+    }
+
+    @GetMapping("/run_ex3_part8")
+    public String runTestEx3Part8() {
+        return runEx3("inc_p8", "atomic_count", 8);
+    }
+
+    @GetMapping("/run_ex3_part10")
+    public String runTestEx3Part10() {
+        restTemplate.postForEntity(getServerUrl() + "/" + "reset", null, String.class);
+        return runEx1(10000, 10, "inc_p8", "atomic_count", 3, 10);
+    }
+
+    private String runEx3(String incCommand, String countCommand, int partNumber) {
+        return runEx2(incCommand, countCommand, 3, partNumber);
     }
 
 }
