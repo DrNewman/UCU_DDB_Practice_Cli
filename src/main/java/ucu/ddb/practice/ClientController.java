@@ -261,4 +261,12 @@ public class ClientController {
         return runEx1(10000, 10, "inc", "count", 5, 2);
     }
 
+// Для завдання 6 --------------------------------------------------------------------------------------------
+
+    @GetMapping("/run_ex6_part2")
+    public String runTestEx6Part2() {
+        restTemplate.postForEntity(getServerUrl() + "/" + "reset", null, String.class);
+        return runEx1(10000, 10, "inc", "count", 6, 2);
+    }
+
 }
